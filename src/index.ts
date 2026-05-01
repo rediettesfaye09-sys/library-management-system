@@ -1,41 +1,41 @@
-import { LoanStatus } from './enums/LoanStatus';
-import { Book } from './models/Book';
-import { Member } from './models/Member';
-import { Loan } from './models/Loan';
+import { BookRepository } from "./repositories/BookRepository";
+import { MemberRepository } from "./repositories/MemberRepository";
+import { LoanRepository } from "./repositories/LoanRepository";
+import { LoanStatus } from "./enums/LoanStatus";
 
-console.log("=== Testing All Models ===\n");
+async function main() {
+  const bookRepo = new BookRepository();
+  const memberRepo = new MemberRepository();
+  const loanRepo = new LoanRepository();
 
-// Test Book - Change these values to books YOU like
-const testBook: Book = {
-    id: 1,
-    title: "The Hobbit",  // Change to your favorite book
-    author: "J.R.R. Tolkien",  // Change to the author
-    isbn: "9780547928227",
-    category: "Fantasy",  // Change to the genre you like
+  const book = await bookRepo.add({
+    title: "future",
+    author: "Robert C. Martin",
+    isbn: "1223456",
+    category: "Programming",
     isAvailable: true,
-    createdAt: new Date()
-};
-console.log("✓ Book model works:", testBook.title);
+  });
 
-// Test Member - Use YOUR name
-const testMember: Member = {
-    id: 1,
-    name: "Your Name Here",  // Put YOUR name here
-    email: "yourname@example.com",  // Put YOUR email here
-    joinedAt: new Date(),
-    isActive: true
-};
-console.log("✓ Member model works:", testMember.name);
+  const member = await memberRepo.add({
+    name: "kebede",
+    email: "kebede@example.com",
+    isActive: true,
+  });
 
-// Test Loan - This is just a test
-const testLoan: Loan = {
-    id: 1,
-    bookId: 1,
-    memberId: 1,
+  await loanRepo.add({
+    bookId: book.id,
+    memberId: member.id,
     borrowedAt: new Date(),
-    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    status: LoanStatus.ACTIVE
-};
-console.log("✓ Loan model works: Status =", testLoan.status);
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    status: LoanStatus.ACTIVE,
+  });
 
-console.log("\n✅ All models created successfully!");
+  console.log("All books:", await bookRepo.getAll());
+  console.log("All members:", await memberRepo.getAll());
+  console.log("Active loans:", await loanRepo.getActiveLoans());
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
