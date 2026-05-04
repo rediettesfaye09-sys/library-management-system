@@ -1,5 +1,6 @@
 import { Book } from "../models/Book";
 import { BookRepository } from "../repositories/BookRepository";
+import { Validators } from "../utils/validators";
 
 export class BookService {
     constructor(private bookRepo: BookRepository) {}
@@ -8,6 +9,11 @@ export class BookService {
     async addBook(
         bookData: Omit<Book, "id" | "createdAt" | "isAvailable">
     ): Promise<Book> {
+
+Validators.validateString(bookData.title, "Title");
+Validators.validateString(bookData.author, "Author");
+Validators.validateISBNOrThrow(bookData.isbn);
+        
         if (!bookData.title?.trim()) {
             throw new Error("Book title is required");
         }

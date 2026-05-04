@@ -3,6 +3,7 @@ import { LoanRepository } from "../repositories/LoanRepository";
 import { BookRepository } from "../repositories/BookRepository";
 import { MemberRepository } from "../repositories/MemberRepository";
 import { LoanStatus } from "../enums/LoanStatus";
+import { Validators } from "../utils/validators";
 
 export class LoanService {
     constructor(
@@ -12,29 +13,29 @@ export class LoanService {
     ) {}
 
     // BORROW BOOK
-    async borrowBook(memberId: number, bookId: number): Promise<Loan> {
-        const member = await this.memberRepo.getById(memberId);
-        if (!member) throw new Error("Member not found");
-        if (!member.isActive) throw new Error("Member is not active");
+   async borrowBook(memberId: number, bookId: number): Promise<Loan> {
 
-        const book = await this.bookRepo.getById(bookId);
-        if (!book) throw new Error("Book not found");
-        if (!book.isAvailable) throw new Error("Book is not available");
+    Validators.validateId(memberId);
+Validators.validateId(bookId);
 
-        // mark book unavailable
-        await this.bookRepo.update(bookId, { isAvailable: false });
+    const member = await this.memberRepo.getById(memberId);
+    if (!member) throw new Error("Member not found");
+    if (!member.isActive) throw new Error("Member is not active");
 
-        const loan: Loan = {
-            id: Date.now(),
-            bookId,
-            memberId,
-            borrowedAt: new Date(),
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            status: LoanStatus.ACTIVE,
-        };
+    const book = await this.bookRepo.getById(bookId);
+    if (!book) throw new Error("Book not found");
+    if (!book.isAvailable) throw new Error("Book is not available");
 
-        return await this.loanRepo.add(loan);
-    }
+    await this.bookRepo.update(bookId, { isAvailable: false });
+
+    return await this.loanRepo.add({
+        bookId,
+        memberId,
+        borrowedAt: new Date(),
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: LoanStatus.ACTIVE,
+    });
+}
 
     // RETURN BOOK
     async returnBook(loanId: number): Promise<Loan> {

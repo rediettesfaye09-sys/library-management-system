@@ -6,28 +6,25 @@ export class MemberService {
 
     // REGISTER MEMBER
     async registerMember(
-        memberData: Omit<Member, "id" | "joinedAt" | "isActive">
-    ): Promise<Member> {
-        if (!memberData.name?.trim()) throw new Error("Member name is required");
-        if (!memberData.email?.trim()) throw new Error("Member email is required");
+    memberData: Omit<Member, "id" | "joinedAt" | "isActive">
+): Promise<Member> {
+    if (!memberData.name?.trim()) throw new Error("Member name is required");
+    if (!memberData.email?.trim()) throw new Error("Member email is required");
 
-        const emailExists = (await this.memberRepo.getAll()).some(
-            (m) => m.email === memberData.email
-        );
+    const emailExists = (await this.memberRepo.getAll()).some(
+        (m) => m.email === memberData.email
+    );
 
-        if (emailExists) {
-            throw new Error("Email already exists");
-        }
-
-        const newMember: Member = {
-            id: Date.now(),
-            ...memberData,
-            isActive: true,
-            joinedAt: new Date(),
-        };
-
-        return this.memberRepo.add(newMember);
+    if (emailExists) {
+        throw new Error("Email already exists");
     }
+
+    //  FIX: NO ID here anymore
+    return this.memberRepo.add({
+        ...memberData,
+        isActive: true
+    });
+}
 
     // GET ALL MEMBERS
     async getAllMembers(): Promise<Member[]> {
