@@ -16,6 +16,12 @@ export class Validators {
         }
     }
 
+    static validateSearch(value: string, fieldName: string): void {
+    if (!value || value.trim().length === 0) {
+        throw new Error(`${fieldName} is required`);
+    }
+}
+
     static validateId(id: number): void {
         if (typeof id !== "number" || id <= 0) {
             throw new Error(`Invalid ID: ${id}. ID must be a positive number`);

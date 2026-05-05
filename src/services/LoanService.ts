@@ -4,6 +4,7 @@ import { BookRepository } from "../repositories/BookRepository";
 import { MemberRepository } from "../repositories/MemberRepository";
 import { LoanStatus } from "../enums/LoanStatus";
 import { Validators } from "../utils/validators";
+import { DateUtils } from "../utils/dateUtils";
 
 export class LoanService {
     constructor(
@@ -32,7 +33,7 @@ Validators.validateId(bookId);
         bookId,
         memberId,
         borrowedAt: new Date(),
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+         dueDate: DateUtils.getDueDate(7),
         status: LoanStatus.ACTIVE,
     });
 }

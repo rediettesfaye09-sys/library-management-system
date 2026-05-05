@@ -14,17 +14,7 @@ Validators.validateString(bookData.title, "Title");
 Validators.validateString(bookData.author, "Author");
 Validators.validateISBNOrThrow(bookData.isbn);
         
-        if (!bookData.title?.trim()) {
-            throw new Error("Book title is required");
-        }
-
-        if (!bookData.author?.trim()) {
-            throw new Error("Book author is required");
-        }
-
-        if (!bookData.isbn?.trim()) {
-            throw new Error("Book ISBN is required");
-        }
+        
 
         return await this.bookRepo.add({
             ...bookData,

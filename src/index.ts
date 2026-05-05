@@ -5,307 +5,527 @@ import { BookService } from "./services/BookService";
 import { MemberService } from "./services/MemberService";
 import { LoanService } from "./services/LoanService";
 
-// -------------------- REPOSITORIES --------------------
+// Initialize repositories and services
 const bookRepo = new BookRepository();
 const memberRepo = new MemberRepository();
 const loanRepo = new LoanRepository();
 
-// -------------------- SERVICES --------------------
 const bookService = new BookService(bookRepo);
 const memberService = new MemberService(memberRepo);
 const loanService = new LoanService(loanRepo, bookRepo, memberRepo);
 
-// -------------------- DEMO --------------------
-async function run() {
+// Helper function to clear console (optional)
+function clearConsole() {
+    console.clear();
+}
+
+// Helper function to wait for user input
+function waitForEnter(): Promise<void> {
+    return new Promise((resolve) => {
+        const readline = require("readline").createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        readline.question("\nPress ENTER to continue...", () => {
+            readline.close();
+            resolve();
+        });
+    });
+}
+
+// ==================== DEMO 1: ADD BOOKS ====================
+async function demoAddBooks() {
     console.log("\n" + "=".repeat(60));
-    console.log("   📚 LIBRARY MANAGEMENT SYSTEM - COMPLETE DEMO");
+    console.log("   DEMO 1: ADD BOOKS TO LIBRARY");
     console.log("=".repeat(60));
+    
+    console.log("\n Adding 3 books...\n");
+    
+    const book1 = await bookService.addBook({
+        title: "Clean Code",
+        author: "Robert Martin",
+        isbn: "9780132350884",
+        category: "Programming"
+    });
+    console.log(`    "${book1.title}" by ${book1.author}`);
+    
+    const book2 = await bookService.addBook({
+        title: "The Hobbit",
+        author: "J.R.R. Tolkien",
+        isbn: "9780547928227",
+        category: "Fantasy"
+    });
+    console.log(`    "${book2.title}" by ${book2.author}`);
+    
+    const book3 = await bookService.addBook({
+        title: "1984",
+        author: "George Orwell",
+        isbn: "9780451524935",
+        category: "Dystopian"
+    });
+    console.log(`    "${book3.title}" by ${book3.author}`);
+    
+    console.log("\n Current Books in Library:");
+    const allBooks = await bookService.getAllBooks();
+    allBooks.forEach(book => {
+        console.log(`    ${book.id}. "${book.title}" - ${book.isAvailable ? 'Available ✅' : 'Borrowed ❌'}`);
+    });
+    
+    console.log("\n Demo 1 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-    try {
-        // ================== LOAD EXISTING DATA (JSON PERSISTENCE) ==================
-        console.log("\n📂 0. LOADING EXISTING DATA FROM JSON...");
-        console.log("-".repeat(40));
-        
-        await bookRepo.loadFromFile();
-        await memberRepo.loadFromFile();
-        await loanRepo.loadFromFile();
-        
-        console.log("✅ Data loaded successfully");
-
-        // ================== 1. ADD BOOKS ==================
-        console.log("\n📚 1. ADDING BOOKS");
-        console.log("-".repeat(40));
-
-        const book1 = await bookService.addBook({
-            title: "The Future",
-            author: "David",
-            isbn: "9780132350884",
-            category: "Programming",
-        });
-        console.log(`   ✅ "${book1.title}" (ID: ${book1.id})`);
-
-        const book2 = await bookService.addBook({
-            title: "TypeScript Handbook",
-            author: "Microsoft",
-            isbn: "9780132350880",
-            category: "Programming",
-        });
-        console.log(`   ✅ "${book2.title}" (ID: ${book2.id})`);
-
-        const book3 = await bookService.addBook({
-            title: "C Programming",
-            author: "Dennis Ritchie",
-            isbn: "9780132350888",
-            category: "Programming",
-        });
-        console.log(`   ✅ "${book3.title}" (ID: ${book3.id})`);
-
-        // ================== 2. VIEW ALL BOOKS ==================
-        console.log("\n📖 2. VIEW ALL BOOKS");
-        console.log("-".repeat(40));
-        
-        const allBooks = await bookService.getAllBooks();
-        console.log(`   Total: ${allBooks.length} books`);
+// ==================== DEMO 2: VIEW ALL BOOKS ====================
+async function demoViewBooks() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 2: VIEW ALL BOOKS");
+    console.log("=".repeat(60));
+    
+    const allBooks = await bookService.getAllBooks();
+    
+    if (allBooks.length === 0) {
+        console.log("\n No books found. Please run Demo 1 first!\n");
+    } else {
+        console.log(`\n Total Books: ${allBooks.length}\n`);
         allBooks.forEach(book => {
-            console.log(`   - "${book.title}" by ${book.author} [${book.category}] - ${book.isAvailable ? '✅ Available' : '❌ Borrowed'}`);
+            console.log(`   ${book.id}. "${book.title}"`);
+            console.log(`      Author: ${book.author}`);
+            console.log(`      Category: ${book.category}`);
+            console.log(`      ISBN: ${book.isbn}`);
+            console.log(`      Status: ${book.isAvailable ? '✅ Available' : '❌ Borrowed'}`);
+            console.log(`      Added: ${book.createdAt.toLocaleDateString()}`);
+            console.log();
         });
+    }
+    
+    console.log(" Demo 2 Complete!");
+    console.log("\n Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        // ================== 3. REGISTER MEMBERS ==================
-        console.log("\n👥 3. REGISTERING MEMBERS");
-        console.log("-".repeat(40));
+// ==================== DEMO 3: REGISTER MEMBERS ====================
+async function demoRegisterMembers() {
+    console.log("\n" + "=".repeat(60));
+    console.log("   👥 DEMO 3: REGISTER MEMBERS");
+    console.log("=".repeat(60));
+    
+    console.log("\n Registering 2 members...\n");
+    
+    const member1 = await memberService.registerMember({
+        name: "Rediet",
+        email: "rediet@gmail.com"
+    });
+    console.log(`    "${member1.name}" (Email: ${member1.email})`);
+    
+    const member2 = await memberService.registerMember({
+        name: "Abebe",
+        email: "abebe@gmail.com"
+    });
+    console.log(`    "${member2.name}" (Email: ${member2.email})`);
+    
+    console.log("\n👥 All Registered Members:");
+    const allMembers = await memberService.getAllMembers();
+    allMembers.forEach(member => {
+        console.log(`   👤 ${member.id}. ${member.name} (${member.email}) - ${member.isActive ? '🟢 Active' : '🔴 Inactive'}`);
+    });
+    
+    console.log("\n Demo 3 Complete!");
+    console.log("\n Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        const member1 = await memberService.registerMember({
-            name: "Rediet",
-            email: "rediet@gmail.com",
-        });
-        console.log(`   ✅ "${member1.name}" (ID: ${member1.id})`);
-
-        const member2 = await memberService.registerMember({
-            name: "Abebe",
-            email: "abebe@gmail.com",
-        });
-        console.log(`   ✅ "${member2.name}" (ID: ${member2.id})`);
-
-        // ================== 4. VIEW ALL MEMBERS ==================
-        console.log("\n👥 4. VIEW ALL MEMBERS");
-        console.log("-".repeat(40));
+// ==================== DEMO 4: BORROW BOOK ====================
+async function demoBorrowBook() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 4: BORROW A BOOK");
+    console.log("=".repeat(60));
+    
+    const members = await memberService.getAllMembers();
+    const books = await bookService.getAllBooks();
+    
+    if (members.length === 0 || books.length === 0) {
+        console.log("\n Please add books and members first! (Run Demos 1 & 3)\n");
+    } else {
+        const member = members[0];
+        const availableBooks = await bookService.getAvailableBooks();
         
-        const allMembers = await memberService.getAllMembers();
-        console.log(`   Total: ${allMembers.length} members`);
-        allMembers.forEach(member => {
-            console.log(`   - ${member.name} (${member.email}) - ${member.isActive ? '🟢 Active' : '🔴 Inactive'}`);
-        });
+        if (availableBooks.length === 0) {
+            console.log("\n  No available books to borrow!\n");
+        } else {
+            const book = availableBooks[0];
+            console.log(`\n ${member.name} wants to borrow "${book.title}"...\n`);
+            
+            const loan = await loanService.borrowBook(member.id, book.id);
+            
+            console.log(`    Book borrowed successfully!`);
+            console.log(`    Due date: ${loan.dueDate.toLocaleDateString()}`);
+            console.log(`    Loan Status: ${loan.status}`);
+            
+            // Show updated book status
+            const updatedBook = await bookService.getBookById(book.id);
+            console.log(`\n    "${book.title}" is now: ${updatedBook.isAvailable ? 'Available' : 'Borrowed ❌'}`);
+        }
+    }
+    
+    console.log("\n Demo 4 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        // ================== 5. SEARCH BOOKS ==================
-        console.log("\n🔍 5. SEARCH BOOKS");
-        console.log("-".repeat(40));
+// ==================== DEMO 5: RETURN BOOK ====================
+async function demoReturnBook() {
+    console.log("\n" + "=".repeat(60));
+    console.log("   ↩ DEMO 5: RETURN A BOOK");
+    console.log("=".repeat(60));
+    
+    const activeLoans = await loanService.getActiveLoans();
+    
+    if (activeLoans.length === 0) {
+        console.log("\n No active loans found. Please borrow a book first! (Run Demo 4)\n");
+    } else {
+        const loan = activeLoans[0];
+        const book = await bookService.getBookById(loan.bookId);
         
-        console.log("   Search by title 'C':");
+        console.log(`\n Returning "${book?.title}"...\n`);
+        
+        const returnedLoan = await loanService.returnBook(book!.id);
+        
+        console.log(`    Book returned successfully!`);
+        console.log(`    Loan Status: ${returnedLoan.status}`);
+        console.log(`    Returned at: ${returnedLoan.returnedAt?.toLocaleString()}`);
+        
+        // Show updated book status
+        const updatedBook = await bookService.getBookById(book!.id);
+        console.log(`\n    "${book?.title}" is now: ${updatedBook.isAvailable ? 'Available ✅' : 'Borrowed ❌'}`);
+    }
+    
+    console.log("\n Demo 5 Complete!");
+    console.log("\n Press ENTER to return to menu...");
+    await waitForEnter();
+}
+
+// ==================== DEMO 6: SEARCH BOOKS ====================
+async function demoSearchBooks() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 6: SEARCH BOOKS");
+    console.log("=".repeat(60));
+    
+    const books = await bookService.getAllBooks();
+    
+    if (books.length === 0) {
+        console.log("\n No books found. Please run Demo 1 first!\n");
+    } else {
+        // Search by Title
+        console.log("\n Search by Title (example: 'C'):");
+        console.log("-".repeat(40));
         const titleSearch = await bookService.searchByTitle("C");
-        titleSearch.forEach(book => {
-            console.log(`   - "${book.title}" by ${book.author}`);
-        });
-        
-        console.log("\n   Search by author 'David':");
-        const authorSearch = await bookService.searchByAuthor("David");
-        authorSearch.forEach(book => {
-            console.log(`   - "${book.title}" by ${book.author}`);
-        });
-
-        // ================== 6. FILTER AVAILABLE BOOKS ==================
-        console.log("\n📊 6. FILTER AVAILABLE BOOKS");
-        console.log("-".repeat(40));
-        
-        const available = await bookService.getAvailableBooks();
-        console.log(`   Books available to borrow: ${available.length}`);
-        available.forEach(book => {
-            console.log(`   - "${book.title}" ✅`);
-        });
-
-        // ================== 7. BORROW BOOK ==================
-        console.log("\n🔄 7. BORROWING A BOOK");
-        console.log("-".repeat(40));
-        
-        console.log(`   ${member1.name} borrows "${book1.title}"...`);
-        const loan1 = await loanService.borrowBook(member1.id, book1.id);
-        console.log(`   ✅ Borrowed successfully!`);
-        console.log(`   Due date: ${loan1.dueDate.toLocaleDateString()}`);
-
-        // ================== 8. BUSINESS RULE: CAN'T BORROW SAME BOOK ==================
-        console.log("\n❌ 8. BUSINESS RULE: Cannot borrow already borrowed book");
-        console.log("-".repeat(40));
-        
-        try {
-            await loanService.borrowBook(member2.id, book1.id);
-        } catch (error: any) {
-            console.log(`   ✅ Correct: ${error.message}`);
+        if (titleSearch.length === 0) {
+            console.log("   No books found starting with 'C'");
+        } else {
+            titleSearch.forEach(book => {
+                console.log(`    "${book.title}" by ${book.author}`);
+            });
         }
-
-        // ================== 9. VIEW ACTIVE LOANS ==================
-        console.log("\n📋 9. VIEW ACTIVE LOANS");
-        console.log("-".repeat(40));
         
-        const activeLoans = await loanService.getActiveLoans();
-        console.log(`   Active loans: ${activeLoans.length}`);
-        for (const loan of activeLoans) {
-            const book = await bookService.getBookById(loan.bookId);
-            const member = await memberService.getMemberById(loan.memberId);
-            console.log(`   - "${book.title}" borrowed by ${member.name}`);
-            console.log(`     Due: ${loan.dueDate.toLocaleDateString()}`);
+        // Search by Author
+        console.log("\n Search by Author (example: 'Martin'):");
+        console.log("-".repeat(40));
+        const authorSearch = await bookService.searchByAuthor("Martin");
+        if (authorSearch.length === 0) {
+            console.log("   No books found by author 'Martin'");
+        } else {
+            authorSearch.forEach(book => {
+                console.log(`    "${book.title}" by ${book.author}`);
+            });
         }
-
-        // ================== 10. VERIFY BOOK IS BORROWED ==================
-        console.log("\n✅ 10. VERIFY BOOK STATUS AFTER BORROWING");
-        console.log("-".repeat(40));
         
-        const borrowedBook = await bookService.getBookById(book1.id);
-        console.log(`   "${borrowedBook.title}" is now: ${borrowedBook.isAvailable ? 'Available' : 'Borrowed ❌'}`);
-
-        // ================== 11. RETURN BOOK ==================
-        console.log("\n ↩️ 11. RETURNING A BOOK");
+        // Show available books
+        console.log("\n Available Books (Filter by Availability):");
         console.log("-".repeat(40));
-        
-        const returnedLoan = await loanService.returnBook(loan1.id);
-        console.log(`   ✅ "${book1.title}" returned!`);
-        console.log(`   Status: ${returnedLoan.status}`);
-
-        // ================== 12. VERIFY BOOK AVAILABLE AGAIN ==================
-        console.log("\n✅ 12. VERIFY BOOK STATUS AFTER RETURN");
-        console.log("-".repeat(40));
-        
-        const returnedBook = await bookService.getBookById(book1.id);
-        console.log(`   "${returnedBook.title}" is now: ${returnedBook.isAvailable ? 'Available ✅' : 'Borrowed ❌'}`);
-
-        // ================== 13. UPDATE BOOK ==================
-        console.log("\n✏️ 13. UPDATE BOOK INFORMATION");
-        console.log("-".repeat(40));
-        
-        const updatedBook = await bookService.updateBook(book1.id, {
-            category: "Software Engineering",
+        const availableBooks = await bookService.getAvailableBooks();
+        availableBooks.forEach(book => {
+            console.log(`    "${book.title}" - Available ✅`);
         });
-        console.log(`   ✅ "${updatedBook.title}" category updated to: ${updatedBook.category}`);
+    }
+    
+    console.log("\n Demo 6 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        // ================== 14. DEACTIVATE MEMBER (BUSINESS RULE TEST) ==================
-        console.log("\n🔴 14. DEACTIVATE MEMBER - BUSINESS RULE TEST");
-        console.log("-".repeat(40));
+// ==================== DEMO 7: DEACTIVATE MEMBER ====================
+async function demoDeactivateMember() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 7: DEACTIVATE MEMBER (Business Rule)");
+    console.log("=".repeat(60));
+    
+    const members = await memberService.getAllMembers();
+    
+    if (members.length === 0) {
+        console.log("\n No members found. Please run Demo 3 first!\n");
+    } else {
+        const member = members[0];
         
-        // Show current status
-        const activeMember = await memberService.getMemberById(member1.id);
-        console.log(`   ${activeMember.name} is currently ${activeMember.isActive ? 'ACTIVE ✅' : 'INACTIVE ❌'}`);
+        console.log(`\n Member: ${member.name} is currently ${member.isActive ? 'ACTIVE ✅' : 'INACTIVE ❌'}`);
         
         // Deactivate member
-        await memberService.deactivateMember(member1.id);
-        console.log(`   ✅ ${member1.name} DEACTIVATED`);
+        console.log(`\n Deactivating ${member.name}...`);
+        await memberService.deactivateMember(member.id);
         
-        // Try to borrow with inactive member (SHOULD FAIL)
-        console.log(`\n   Testing: ${member1.name} tries to borrow "${book3.title}"...`);
-        try {
-            await loanService.borrowBook(member1.id, book3.id);
-            console.log(`   ❌ ERROR: Inactive member was able to borrow!`);
-        } catch (error: any) {
-            console.log(`   ✅ BUSINESS RULE WORKS: ${error.message}`);
+        // Try to borrow (should fail)
+        console.log(`\n Testing: ${member.name} tries to borrow a book...`);
+        const books = await bookService.getAvailableBooks();
+        
+        if (books.length > 0) {
+            try {
+                await loanService.borrowBook(member.id, books[0].id);
+                console.log("   ❌ ERROR: Inactive member was able to borrow!");
+            } catch (error: any) {
+                console.log(`    BUSINESS RULE WORKS: ${error.message}`);
+            }
         }
         
         // Reactivate member
-        await memberService.activateMember(member1.id);
-        console.log(`\n   ✅ ${member1.name} REACTIVATED`);
+        console.log(`\n Reactivating ${member.name}...`);
+        await memberService.activateMember(member.id);
+        console.log(`    ${member.name} is now ACTIVE again`);
         
-        // Verify can borrow after reactivation
-        console.log(`\n   Testing: ${member1.name} tries to borrow "${book3.title}" after reactivation...`);
-        const newLoan = await loanService.borrowBook(member1.id, book3.id);
-        console.log(`   ✅ ${member1.name} successfully borrowed "${book3.title}"`);
-        
-        // Return the book to clean up (FIXED: use newLoan.id)
-        await loanService.returnBook(newLoan.id);
-        console.log(`   ✅ "${book3.title}" returned`);
-
-        // ================== 15. REMOVE BOOK ==================
-        console.log("\n🗑️ 15. REMOVE BOOK FROM SYSTEM");
-        console.log("-".repeat(40));
-        
-        await bookService.removeBook(book2.id);
-        console.log(`   ✅ "${book2.title}" removed from library`);
-        
-        const remainingBooks = await bookService.getAllBooks();
-        console.log(`   Remaining books: ${remainingBooks.length}`);
-
-        // ================== 16. SEARCH MEMBERS ==================
-        console.log("\n🔍 16. SEARCH MEMBERS");
-        console.log("-".repeat(40));
-        
-        const memberSearch = await memberService.searchByName("Red");
-        console.log(`   Search 'Red': ${memberSearch.length} result(s)`);
-        memberSearch.forEach(member => {
-            console.log(`   - ${member.name} (${member.email})`);
-        });
-
-        // ================== 17. CHECK OVERDUE LOANS ==================
-        console.log("\n⏰ 17. CHECK OVERDUE LOANS");
-        console.log("-".repeat(40));
-        
-        const overdue = await loanService.getOverdueLoans();
-        console.log(`   Overdue loans: ${overdue.length}`);
-        if (overdue.length === 0) {
-            console.log(`   ✅ No overdue loans found`);
+        // Verify can borrow now
+        console.log(`\n Testing: ${member.name} tries to borrow again...`);
+        if (books.length > 0) {
+            const newLoan = await loanService.borrowBook(member.id, books[0].id);
+            console.log(`    ${member.name} successfully borrowed "${books[0].title}"`);
+          await loanService.returnBook(newLoan.id);
+            console.log(`    Book returned`);
         }
+    }
+    
+    console.log("\n Demo 7 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        // ================== 18. VALIDATION TEST ==================
-        console.log("\n⚠️ 18. VALIDATION TEST (Should fail)");
-        console.log("-".repeat(40));
+// ==================== DEMO 8: UPDATE BOOK ====================
+async function demoUpdateBook() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 8: UPDATE BOOK INFORMATION");
+    console.log("=".repeat(60));
+    
+    const books = await bookService.getAllBooks();
+    
+    if (books.length === 0) {
+        console.log("\n No books found. Please run Demo 1 first!\n");
+    } else {
+        const book = books[0];
+        console.log(`\n Before Update:`);
+        console.log(`   Title: "${book.title}"`);
+        console.log(`   Category: ${book.category}`);
         
-        try {
-            await bookService.addBook({
-                title: "",
-                author: "",
-                isbn: "123",
-                category: "Test",
-            });
-        } catch (error: any) {
-            console.log(`   ✅ Validation working: ${error.message}`);
+        console.log(`\n Updating category to "Software Engineering"...`);
+        const updated = await bookService.updateBook(book.id, {
+            category: "Software Engineering"
+        });
+        
+        console.log(`\n After Update:`);
+        console.log(`   Title: "${updated.title}"`);
+        console.log(`   Category: ${updated.category} ✅`);
+    }
+    
+    console.log("\n Demo 8 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
+
+// ==================== DEMO 9: REMOVE BOOK ====================
+async function demoRemoveBook() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 9: REMOVE BOOK");
+    console.log("=".repeat(60));
+    
+    const books = await bookService.getAllBooks();
+    
+    if (books.length === 0) {
+        console.log("\n No books found. Please run Demo 1 first!\n");
+    } else {
+        const book = books[books.length - 1];
+        console.log(`\n Removing book: "${book.title}"...`);
+        
+        await bookService.removeBook(book.id);
+        console.log(`    "${book.title}" removed from library`);
+        
+        const remaining = await bookService.getAllBooks();
+        console.log(`\n Remaining books: ${remaining.length}`);
+        remaining.forEach(b => {
+            console.log(`    "${b.title}"`);
+        });
+    }
+    
+    console.log("\n Demo 9 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
+
+// ==================== DEMO 10: CHECK OVERDUE LOANS ====================
+async function demoOverdueLoans() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 10: CHECK OVERDUE LOANS");
+    console.log("=".repeat(60));
+    
+    const overdue = await loanService.getOverdueLoans();
+    
+    if (overdue.length === 0) {
+        console.log("\n No overdue loans found!");
+        console.log("   All borrowed books have been returned on time.");
+    } else {
+        console.log(`\n Found ${overdue.length} overdue loan(s):`);
+        for (const loan of overdue) {
+            const book = await bookService.getBookById(loan.bookId);
+            const member = await memberService.getMemberById(loan.memberId);
+            console.log(`    "${book?.title}" borrowed by ${member?.name}`);
+            console.log(`    Due date: ${loan.dueDate.toLocaleDateString()}`);
         }
+    }
+    
+    console.log("\n Demo 10 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
 
-        // ================== 19. SAVE TO JSON (PERSISTENCE) ==================
-        console.log("\n💾 19. SAVING DATA TO JSON FILES");
-        console.log("-".repeat(40));
-        
-        await bookRepo.saveToFile();
-        await memberRepo.saveToFile();
-        await loanRepo.saveToFile();
-        console.log(`   ✅ All data saved to src/data/ folder`);
-
-        // ================== FINAL STATE SUMMARY ==================
-        console.log("\n" + "=".repeat(60));
-        console.log("   📊 FINAL SYSTEM STATE SUMMARY");
-        console.log("=".repeat(60));
-        
-        const finalBooks = await bookService.getAllBooks();
-        const finalMembers = await memberService.getAllMembers();
-        const finalLoans = await loanService.getAllLoans();
-        const finalActive = await loanService.getActiveLoans();
-        
-        console.log(`\n   📚 Books in library: ${finalBooks.length}`);
-        finalBooks.forEach(book => {
-            console.log(`      - "${book.title}" [${book.category}] - ${book.isAvailable ? '✅ Available' : '❌ Borrowed'}`);
+// ==================== DEMO 11: VALIDATION TEST ====================
+async function demoValidation() {
+    console.log("\n" + "=".repeat(60));
+    console.log("    DEMO 11: VALIDATION TEST");
+    console.log("=".repeat(60));
+    
+    console.log("\n Trying to add a book with empty title...\n");
+    
+    try {
+        await bookService.addBook({
+            title: "",
+            author: "",
+            isbn: "123",
+            category: "Test"
         });
-        
-        console.log(`\n   👥 Registered members: ${finalMembers.length}`);
-        finalMembers.forEach(member => {
-            console.log(`      - ${member.name} (${member.email}) - ${member.isActive ? '🟢 Active' : '🔴 Inactive'}`);
-        });
-        
-        console.log(`\n   📖 Total loans: ${finalLoans.length}`);
-        console.log(`   📖 Active loans: ${finalActive.length}`);
-        
-        console.log("\n" + "=".repeat(60));
-        console.log("   ✅ ALL FEATURES DEMONSTRATED SUCCESSFULLY!");
-        console.log("   🎉 LIBRARY MANAGEMENT SYSTEM IS READY FOR PRESENTATION!");
-        console.log("=".repeat(60) + "\n");
-
+        console.log("   ❌ ERROR: Should have failed!");
     } catch (error: any) {
-        console.error("\n❌ ERROR:", error.message);
-        console.error(error.stack);
+        console.log(`   ✅ VALIDATION WORKS: ${error.message}`);
+    }
+    
+    console.log("\n📧 Trying to register member with invalid email...\n");
+    
+    try {
+        await memberService.registerMember({
+            name: "Test User",
+            email: "invalid-email"
+        });
+        console.log("   ❌ ERROR: Should have failed!");
+    } catch (error: any) {
+        console.log(`   ✅ VALIDATION WORKS: ${error.message}`);
+    }
+    
+    console.log("\n Demo 11 Complete!");
+    console.log("\n💡 Press ENTER to return to menu...");
+    await waitForEnter();
+}
+
+// ==================== MAIN MENU ====================
+async function showMenu() {
+    while (true) {
+        console.clear();
+        console.log("\n" + "=".repeat(60));
+        console.log("   📚 LIBRARY MANAGEMENT SYSTEM");
+        console.log("   Interactive Presentation Menu");
+        console.log("=".repeat(60));
+        console.log("\n   Select a feature to demonstrate:");
+        console.log("-".repeat(50));
+        console.log("   1.   Add Books");
+        console.log("   2.   View All Books");
+        console.log("   3.   Register Members");
+        console.log("   4.   Borrow a Book");
+        console.log("   5.   Return a Book");
+        console.log("   6.   Search Books (Title/Author)");
+        console.log("   7.   Deactivate Member (Business Rule)");
+        console.log("   8.   Update Book Information");
+        console.log("   9.   Remove a Book");
+        console.log("   10.  Check Overdue Loans");
+        console.log("   11.  Validation Test");
+        console.log("   12.  Run ALL Demos");
+        console.log("   0.   Exit");
+        console.log("-".repeat(50));
+        
+        // Read user input
+        const readline = require('readline').createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        
+        const answer = await new Promise<string>((resolve) => {
+            readline.question("\n   Enter your choice: ", (input: string) => {
+                readline.close();
+                resolve(input);
+            });
+        });
+        
+        switch(answer) {
+            case '1':
+                await demoAddBooks();
+                break;
+            case '2':
+                await demoViewBooks();
+                break;
+            case '3':
+                await demoRegisterMembers();
+                break;
+            case '4':
+                await demoBorrowBook();
+                break;
+            case '5':
+                await demoReturnBook();
+                break;
+            case '6':
+                await demoSearchBooks();
+                break;
+            case '7':
+                await demoDeactivateMember();
+                break;
+            case '8':
+                await demoUpdateBook();
+                break;
+            case '9':
+                await demoRemoveBook();
+                break;
+            case '10':
+                await demoOverdueLoans();
+                break;
+            case '11':
+                await demoValidation();
+                break;
+            case '12':
+                await demoAddBooks();
+                await demoViewBooks();
+                await demoRegisterMembers();
+                await demoBorrowBook();
+                await demoReturnBook();
+                await demoSearchBooks();
+                await demoDeactivateMember();
+                await demoUpdateBook();
+                await demoRemoveBook();
+                await demoOverdueLoans();
+                await demoValidation();
+                break;
+            case '0':
+                console.log("\n Thank you for watching!");
+                console.log(" Library Management System - Presentation Complete!\n");
+                process.exit(0);
+                break;
+            default:
+                console.log("\n❌ Invalid choice! Press ENTER to try again...");
+                await waitForEnter();
+        }
     }
 }
 
-// Run the demo
-run();
+// Start the presentation
+showMenu();
